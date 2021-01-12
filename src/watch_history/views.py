@@ -15,7 +15,6 @@ def home(request):
     return render(request, 'watch_history/home.html', context)
 
 
-
 def charts(request):
     history = request.session['history']                                            # gets json loaded file from session
     history_df = pd.DataFrame(history)                                              # turns json to panda dataframe
@@ -24,9 +23,8 @@ def charts(request):
     history_df['title'] = history_df.apply(lambda row: row['title'][8:], axis=1)    # reformates title column
     history_df['channel_url'] = history_df.apply(lambda row: row['channel'][0]['url'], axis=1)
     history_df['channel'] = history_df.apply(lambda row: row['channel'][0]['name'], axis=1)
-
     history_df['id'] = history_df.apply(lambda row: row['url'][32:43], axis=1)      # creates videoID column
-    print(settings.SECRET_KEY)
+
     category_dict = {}
     video_ids = []
     video_categories = []
@@ -64,7 +62,6 @@ def charts(request):
     
     history_df['category'] = video_categories
     history_df['duration'] = video_durations
-
 
     context = {
         'history': history_df.to_html()
