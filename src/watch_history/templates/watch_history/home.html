@@ -1,0 +1,18 @@
+{% extends 'base.html'%}
+
+{% block content %}
+    <h1>Home</h1>
+    <p>This explains how app works.</p>
+    <p>Button to Upload (scrolls down)</p>
+
+    <h1>Upload</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="history_json">
+        <button type="submit">Upload file</button>
+    </form>
+    {% if request.method == 'POST' %}
+        <p>Analyze: <a href="/watch_history/charts/">Click Here</a></p>
+    {% endif %}
+
+{% endblock content%}
