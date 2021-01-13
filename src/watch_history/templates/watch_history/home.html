@@ -1,18 +1,64 @@
 {% extends 'base.html'%}
 
 {% block content %}
-    <h1>Home</h1>
-    <p>This explains how app works.</p>
-    <p>Button to Upload (scrolls down)</p>
+    <div class="container">
+        <h1>How it works</h1>
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="card-body">
+                    <p>1. Download history from Google Takeout.</p>
+                    <p>[gif/image goes here]</p>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="card-body">
+                    <p>2. Upload to YT Watch History Analytics</p>
+                    <p>[gif/image goes here]</p>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="card-body">
+                    <p>3. See results!</p>
+                    <p>[gif/image goes here]</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <h1>Upload</h1>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="file" name="history_json">
-        <button type="submit">Upload file</button>
-    </form>
+    <div class="container">
+        <div class="row">
+            <h1>Download watch history from Google Takeout</h1>
+            <div class="col-sm-6">
+                <ol>
+                    <li>Go to: https://takeout.google.com/settings/takeout</li>
+                    <li>Deselect all and scroll to bottom</li>
+                    <li>Select YouTube and YouTube Music</li>
+                    <li>Change selected data to “history”</li>
+                    <li>Change data file format to “JSON”</li>
+                    <li>[etc....]</li>
+                </ol>
+            </div>
+            <div class="col-sm-3">
+                <p>[gif/image goes here]</p>
+            </div>
+            <div class="col-sm-3">
+                <p>[gif/image goes here]</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Upload JSON data</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="history_json">
+            <button type="submit" >Upload file</button>
+        </form>
     {% if request.method == 'POST' %}
-        <p>Analyze: <a href="/watch_history/charts/">Click Here</a></p>
+        <form action="/watch_history/charts/" class="mt-3">
+            <input type="submit" class="btn btn-primary" value="Analyze" />
+        </form>
     {% endif %}
+    </div>
 
 {% endblock content%}
