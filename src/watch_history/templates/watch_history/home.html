@@ -49,7 +49,7 @@
 
     <div class="container">
         <h1>Upload JSON data</h1>
-        <form method="post" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="file" name="history_json">
             <button type="submit" >Upload file</button>
