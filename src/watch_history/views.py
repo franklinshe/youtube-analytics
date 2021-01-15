@@ -8,15 +8,16 @@ from django.conf import settings
 def home(request):
     context = {}
     if request.method == 'POST':
-        uploaded_file = request.FILES['history_json'] # pulls uploaded file from html form
-        request.session['history'] = json.loads(uploaded_file.read()) # sends json loaded file to session
+        uploaded_file = request.FILES['history_json']
+        history_df = reformat_history(json.loads(uploaded_file.read()))
+        request.session['history'] = history_df.to_json()
         
     return render(request, 'watch_history/home.html', context)
 
 
 def charts(request):
     history = request.session['history']
-    history_df = reformat_history(history)
+    history_df = pd.read_json(history)
 
     if request.method == 'POST':
         print(request.POST)
