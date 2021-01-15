@@ -18,6 +18,7 @@ def home(request):
 def charts(request):
     history = request.session['history']                                            # gets json loaded file from session
     history_df = pd.DataFrame(history)                                              # turns json to panda dataframe
+    history_df = history_df.dropna()
     history_df = history_df.drop(columns=['header', 'products'])                    # deletes header and products column
     history_df = history_df.rename(columns={'titleUrl':'url', 'subtitles':'channel'})  # renames columns
     history_df['title'] = history_df.apply(lambda row: row['title'][8:], axis=1)    # reformates title column
@@ -67,4 +68,3 @@ def charts(request):
         'history': history_df.to_html()
     }
     return render(request, 'watch_history/charts.html', context)
-

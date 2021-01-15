@@ -12,17 +12,20 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 import os
-
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+env = environ.Env()
+env_file = os.path.join(BASE_DIR, '.env')
+env.read_env(env_file)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'e_e(!5%6h8lzbby5zo91ip4tzm&yd+2svvzocm99kdz#4b9au_'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -135,4 +138,4 @@ MEDIA_ROOT = BASE_DIR / 'static_cdn' / 'media_root'
 
 # Youtube API
 
-YOUTUBE_DATA_API_KEY = 'AIzaSyDW4cnFnn70lDZecpiYjHouzNbIyEGnj4U'
+YOUTUBE_DATA_API_KEY = env('YOUTUBE_DATA_API_KEY')
