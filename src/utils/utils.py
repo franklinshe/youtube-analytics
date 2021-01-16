@@ -1,10 +1,7 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import json
 import requests
-from io import BytesIO
-import base64
+
 from isodate import parse_duration
 from django.conf import settings
 
@@ -84,30 +81,3 @@ def time_series_data(timeframe, today, history_df):
     # print(time_series_df.info())
     return time_series_df
 
-def get_image():
-    buffer = BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
-    image_png = buffer.getvalue()
-    graph = base64.b64encode(image_png)
-    graph = graph.decode('utf-8')
-    buffer.close()
-    return graph
-
-
-def get_time_series_graph(x, y, labels):
-    # print(x)
-    # print(y)
-    # print(labels)
-    plt.switch_backend('AGG')
-    plt.figure(figsize=(10,4))
-    plt.title("Categories Over Time")
-    # x = kwargs.get('x')
-    # y = kwargs.get('y')
-    # labels = kwargs.get('labels')
-    plt.stackplot(x,y,labels=labels)
-    plt.legend(loc='upper left')
-    # df.plot.area()
-    
-    graph = get_image()
-    return graph

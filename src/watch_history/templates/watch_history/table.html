@@ -1,0 +1,11 @@
+{% extends 'base.html'%}
+
+{% block content %}
+    <h1>Table</h1>
+    <hr>
+    <form action="/watch_history/charts/" class="mt-3">
+            <input type="submit" class="btn btn-primary" value="Charts" />
+    </form>
+    {{ history | safe }}
+    
+{% endblock content%}
