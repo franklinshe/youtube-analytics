@@ -1,6 +1,10 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 import json
 import requests
+from io import BytesIO
+import base64
 from isodate import parse_duration
 from django.conf import settings
 
@@ -12,14 +16,17 @@ def chunks(lst, n):
 def reformat_history(history):
     """Reformat uploaded JSON history into pandas dataframe 
     and use Youtube Data API to add category and duration column."""
-    history_df = pd.DataFrame(history)                                              # turns json to panda dataframe
-    history_df = history_df.dropna()
-    history_df = history_df.drop(columns=['header', 'products'])                    # deletes header and products column
-    history_df = history_df.rename(columns={'titleUrl':'url', 'subtitles':'channel'})  # renames columns
-    history_df['title'] = history_df.apply(lambda row: row['title'][8:], axis=1)    # reformates title column
+    history_df = pd.DataFrame(history)
+    history_df = history_df.dropna().reset_index(drop=True)
+    history_df = history_df.drop(columns=['header', 'products'])
+    history_df = history_df.rename(columns={'titleUrl':'url', 'subtitles':'channel'})
+    history_df['title'] = history_df.apply(lambda row: row['title'][8:], axis=1)
     history_df['channel_url'] = history_df.apply(lambda row: row['channel'][0]['url'], axis=1)
     history_df['channel'] = history_df.apply(lambda row: row['channel'][0]['name'], axis=1)
-    history_df['id'] = history_df.apply(lambda row: row['url'][32:43], axis=1)      # creates videoID column
+    history_df['id'] = history_df.apply(lambda row: row['url'][32:43], axis=1)
+    history_df['date'] = history_df.apply(lambda row: row['time'][0:10], axis=1)
+    history_df['time'] = history_df.apply(lambda row: row['time'][11:13], axis=1).astype('int64')
+    history_df['date'] = pd.to_datetime(history_df['date'], format='%Y-%m-%d')
 
     category_dict = {}
     video_ids = []
@@ -58,4 +65,49 @@ def reformat_history(history):
     
     history_df['category'] = video_categories
     history_df['duration'] = video_durations
+    history_df = history_df[['title','channel','id','category','duration','date','time','url','channel_url']]
+
     return history_df
+
+
+
+def time_series_data(timeframe, today, history_df):
+    bucket = 1
+    time_series_dict = {}
+    for i in range(int(timeframe)//bucket): # maybe extra bucket here, fix range
+        to_date = today - pd.Timedelta(i*bucket, unit='D')
+        bucket_df = history_df[(history_df['date'] > to_date - pd.Timedelta(bucket+1, unit='D')) & (history_df['date'] < to_date)]
+        time_series_dict[to_date] = bucket_df.groupby(['category']).size().to_dict()
+    time_series_df = pd.DataFrame.from_dict(time_series_dict, orient='index').fillna(0).astype('int64')
+    # print(time_series_df.to_numpy().sum())
+    # print(time_series_df)
+    # print(time_series_df.info())
+    return time_series_df
+
+def get_image():
+    buffer = BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    image_png = buffer.getvalue()
+    graph = base64.b64encode(image_png)
+    graph = graph.decode('utf-8')
+    buffer.close()
+    return graph
+
+
+def get_time_series_graph(x, y, labels):
+    # print(x)
+    # print(y)
+    # print(labels)
+    plt.switch_backend('AGG')
+    plt.figure(figsize=(10,4))
+    plt.title("Categories Over Time")
+    # x = kwargs.get('x')
+    # y = kwargs.get('y')
+    # labels = kwargs.get('labels')
+    plt.stackplot(x,y,labels=labels)
+    plt.legend(loc='upper left')
+    # df.plot.area()
+    
+    graph = get_image()
+    return graph

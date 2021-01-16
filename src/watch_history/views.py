@@ -1,7 +1,8 @@
 import pandas as pd
 import json
 import requests
-from utils.utils import reformat_history
+from datetime import date, timedelta
+from utils.utils import reformat_history, time_series_data, get_time_series_graph
 from django.shortcuts import render
 from django.conf import settings
 
@@ -16,15 +17,20 @@ def home(request):
 
 
 def charts(request):
+    time_series_graph = None
     history = request.session['history']
     history_df = pd.read_json(history)
-
+    history_df_truncated = history_df
     if request.method == 'POST':
-        print(request.POST)
         timeframe = request.POST.get('timeframe')
-        print(timeframe)
+        today = pd.Timestamp('today').floor('D')
+        history_df_truncated = history_df[(history_df['date'] > today - pd.Timedelta(int(timeframe), unit='D')) & (history_df['date'] < today)]
+        
+        time_series_df = time_series_data(timeframe, today, history_df_truncated)
+        time_series_graph = get_time_series_graph(x=list(time_series_df.index.values),y=time_series_df.transpose().to_numpy(),labels=list(time_series_df.columns.values))
 
     context = {
-        'history': history_df.to_html()
+        'history': history_df_truncated.to_html(),
+        'graph': time_series_graph
     }
     return render(request, 'watch_history/charts.html', context)

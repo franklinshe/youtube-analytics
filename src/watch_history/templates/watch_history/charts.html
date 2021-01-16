@@ -8,15 +8,22 @@
         <div class="form-group">
             <label for="timeframeSelect">Select Timeframe</label>
             <select name="timeframe" class="form-control" type="submit" id="timeframeSelect">
-                <option value="week">Past Week</option>
-                <option value="month">Past Month</option>
-                <option value="6_months">Past 6 Months</option>
-                <option value="year">Past Year</option>
-                <option value="alltime">All Time</option>
+                <option value=7>Past Week</option>
+                <option value=30>Past Month</option>
+                <option value=180>Past 6 Months</option>
+                <option value=365>Past Year</option>
+                <option value="all_time">All Time</option>
             </select>
         </div>
         <input type="submit" name="submit" value="Submit">
     </form>
+
+    
+        {% if graph %}
+            <img src="data:image/png;base64, {{ graph | safe }}">
+        {% endif %}
+    
+
 
     <hr>
     {{ history | safe }}
