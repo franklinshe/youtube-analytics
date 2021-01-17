@@ -22,6 +22,7 @@ def charts(request):
     pie_chart = None
     categories = None
     recent_df_html = None
+    bucket = None
 
     history = request.session['history']
     history_df = pd.read_json(history)
@@ -29,17 +30,24 @@ def charts(request):
     if request.method == 'POST':
         timeframe = request.POST.get('timeframe')
         category = request.POST.get('category')
+        bucket = int(request.POST.get('bucket'))
         today = pd.Timestamp('today').floor('D')
-        history_df_truncated = history_df[(history_df['date'] > today - pd.Timedelta(int(timeframe), unit='D')) & (history_df['date'] < today)]
         
-        time_series_df = time_series_data(timeframe, today, history_df_truncated)
-        time_series_graph = get_time_series_graph(x=list(time_series_df.index.values),y=time_series_df.transpose().to_numpy(),labels=list(time_series_df.columns.values))
+        if timeframe == 'all_time':
+            time_delta = today - history_df['date'].iat[-1]
+            time_series_df = time_series_data(time_delta.days, bucket, today, history_df)
+        else:
+            timeframe = int(timeframe)
+            history_df_truncated = history_df[(history_df['date'] > today - pd.Timedelta(timeframe, unit='D')) & (history_df['date'] < today)]
+            time_series_df = time_series_data(timeframe, bucket, today, history_df_truncated)
         
-        print(category)
+        time_series_graph = get_time_series_graph(list(time_series_df.index), time_series_df.transpose().to_numpy(), list(time_series_df.columns.values))
+        
         pie_chart_df = history_df_truncated.groupby(['category']).size().reset_index(name='count')
         categories = pie_chart_df.loc[:,'category'].tolist()
-        pie_chart = get_pie_chart(labels=categories,sizes=pie_chart_df.loc[:,'count'].tolist())
-        recent_df_html = history_df.loc[history_df['category'] == category].drop(columns=['url', 'channel_url', 'time', 'id']).head(10).to_html()
+        pie_chart = get_pie_chart(categories, pie_chart_df.loc[:,'count'].tolist())
+
+        recent_df_html = history_df.loc[history_df['category'] == category].drop(columns=['url', 'channel_url', 'time', 'id']).head(20).to_html()
 
     context = {
         'categories': categories,
@@ -51,11 +59,14 @@ def charts(request):
     return render(request, 'watch_history/charts.html', context)
 
 #TODO both time series and pie chart are a broken...
-#     add "all_time" functionality
-#     fix duration format??? time delta 
-#     make recents table nicer, with hyperlinks to channel and video
-#     add more charts, and implement tab feature where only one chart at a time is shown and the rest hidden
-#     Add summary statistics and interesting stats in column
+    # fix buckets: either user chooses bucket or default value, make sure value of bucket matches days grouped by
+    # fix selectors, stay on value chosen when submitted
+    # create others category which groups all videos outside top 7 categories (for better visability)
+    # fix time series x axis, dates are correct/match bucket size
+    # fix duration format??? time delta 
+    # make recents table nicer, with hyperlinks to channel and video
+    # add more charts, and implement tab feature where only one chart at a time is shown and the rest hidden
+    # Add summary statistics and interesting stats in column
 
 def table(request):
     history = request.session['history']

@@ -1,43 +1,36 @@
 import pandas as pd
+import plotly.graph_objects as go
 import matplotlib.pyplot as plt
-import seaborn as sns
 
-from io import BytesIO
-import base64
+# from io import BytesIO
+# import base64
+# def get_image():
+#     buffer = BytesIO()
+#     plt.savefig(buffer, format='png')
+#     buffer.seek(0)
+#     image_png = buffer.getvalue()
+#     graph = base64.b64encode(image_png)
+#     graph = graph.decode('utf-8')
+#     buffer.close()
+#     return graph
 
+def get_time_series_graph(x, data, labels):
 
-def get_image():
-    buffer = BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
-    image_png = buffer.getvalue()
-    graph = base64.b64encode(image_png)
-    graph = graph.decode('utf-8')
-    buffer.close()
-    return graph
+    fig = go.Figure()
+    for y, label in zip(data, labels):
+        fig.add_trace(go.Scatter(
+            x=x, y=y,
+            name=label,
+            hoverinfo='name+y',
+            mode='lines',
+            # line=dict(width=0.5, color='rgb(131, 90, 241)'),
+            stackgroup='one' # define stack group
+        ))
+    return fig.to_html(full_html=False, default_height=800, default_width=1300)
 
-
-def get_time_series_graph(x, y, labels):
-    # print(x)
-    # print(y)
-    # print(labels)
-    plt.switch_backend('AGG')
-    plt.figure(figsize=(10,4))
-    plt.title("Categories Over Time")
-    # x = kwargs.get('x')
-    # y = kwargs.get('y')
-    # labels = kwargs.get('labels')
-    plt.stackplot(x,y,labels=labels)
-    plt.legend(loc='upper left')
-    # df.plot.area()
-    
-    graph = get_image()
-    return graph
 
 def get_pie_chart(labels, sizes):
-    fig1, ax1 = plt.subplots()
-    ax1.pie(sizes, labels=labels, autopct='%1.1f%%', shadow=True, startangle=90)
-    ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
 
-    graph = get_image()
-    return graph
+    fig = go.Figure(data=[go.Pie(labels=labels, values=sizes)])
+
+    return fig.to_html(full_html=False, default_height=800, default_width=1000)

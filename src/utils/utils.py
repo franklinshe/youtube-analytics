@@ -13,11 +13,11 @@ def chunks(lst, n):
 def reformat_history(history):
     """Reformat uploaded JSON history into pandas dataframe 
     and use Youtube Data API to add category and duration column."""
-    history_df = pd.DataFrame(history)
+    history_df = pd.DataFrame(history)  
+    history_df = history_df.drop(columns=['header', 'products', 'details','description'])
     history_df = history_df.dropna().reset_index(drop=True)
-    history_df = history_df.drop(columns=['header', 'products'])
     history_df = history_df.rename(columns={'titleUrl':'url', 'subtitles':'channel'})
-    history_df['title'] = history_df.apply(lambda row: row['title'][8:], axis=1)
+    history_df['title'] = history_df.apply(lambda row: row['title'][8:], axis=1)  
     history_df['channel_url'] = history_df.apply(lambda row: row['channel'][0]['url'], axis=1)
     history_df['channel'] = history_df.apply(lambda row: row['channel'][0]['name'], axis=1)
     history_df['id'] = history_df.apply(lambda row: row['url'][32:43], axis=1)
@@ -68,10 +68,9 @@ def reformat_history(history):
 
 
 
-def time_series_data(timeframe, today, history_df):
-    bucket = 1
+def time_series_data(timeframe, bucket, today, history_df):
     time_series_dict = {}
-    for i in range(int(timeframe)//bucket): # maybe extra bucket here, fix range
+    for i in range(timeframe//bucket): # maybe extra bucket here, fix range
         to_date = today - pd.Timedelta(i*bucket, unit='D')
         bucket_df = history_df[(history_df['date'] > to_date - pd.Timedelta(bucket+1, unit='D')) & (history_df['date'] < to_date)]
         time_series_dict[to_date] = bucket_df.groupby(['category']).size().to_dict()
