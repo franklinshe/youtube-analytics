@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 #     return graph
 
 def get_time_series_graph(x, data, labels):
-
+    print(data)
     fig = go.Figure()
     for y, label in zip(data, labels):
         fig.add_trace(go.Scatter(

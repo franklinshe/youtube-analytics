@@ -13,8 +13,8 @@ def chunks(lst, n):
 def reformat_history(history):
     """Reformat uploaded JSON history into pandas dataframe 
     and use Youtube Data API to add category and duration column."""
-    history_df = pd.DataFrame(history)  
-    history_df = history_df.drop(columns=['header', 'products', 'details','description'])
+    history_df = pd.DataFrame(history)
+    history_df = history_df[['title','titleUrl','subtitles','time']]
     history_df = history_df.dropna().reset_index(drop=True)
     history_df = history_df.rename(columns={'titleUrl':'url', 'subtitles':'channel'})
     history_df['title'] = history_df.apply(lambda row: row['title'][8:], axis=1)  
@@ -74,9 +74,9 @@ def time_series_data(timeframe, bucket, today, history_df):
         to_date = today - pd.Timedelta(i*bucket, unit='D')
         bucket_df = history_df[(history_df['date'] > to_date - pd.Timedelta(bucket+1, unit='D')) & (history_df['date'] < to_date)]
         time_series_dict[to_date] = bucket_df.groupby(['category']).size().to_dict()
-    time_series_df = pd.DataFrame.from_dict(time_series_dict, orient='index').fillna(0).astype('int64')
+    time_series_df = pd.DataFrame.from_dict(time_series_dict, orient='index')
     # print(time_series_df.to_numpy().sum())
-    # print(time_series_df)
-    # print(time_series_df.info())
+    print(time_series_df)
+    print(time_series_df.info())
     return time_series_df
 
